@@ -10,6 +10,24 @@
       </el-tag>
     </div>
 
+    <el-alert
+      v-if="loadError"
+      class="load-error"
+      type="error"
+      :closable="false"
+      show-icon
+      title="统计数据加载失败"
+    >
+      <template #default>
+        <div class="load-error-body">
+          <span>无法连接后台统计服务，当前展示的不是真实数据。</span>
+          <el-button size="small" type="error" plain round :loading="loading" @click="fetchStats">
+            重新加载
+          </el-button>
+        </div>
+      </template>
+    </el-alert>
+
     <div class="stat-grid">
       <div class="stat-card glass-panel hover-lift" @click="go('/author/novels')">
         <div class="stat-icon icon-indigo"><Collection /></div>
@@ -63,22 +81,28 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 import {
   Collection, EditPen, Promotion, Clock, Histogram, ArrowRight
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const loading = ref(false)
+const loadError = ref(false)
 const stats = ref({})
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
 const fetchStats = async () => {
   loading.value = true
+  loadError.value = false
   try {
     const res = await axios.get(`${API_URL}/author/stats`)
     stats.value = res.data
   } catch (err) {
     console.error('加载统计信息失败', err)
+    stats.value = {}
+    loadError.value = true
+    ElMessage.error('统计数据加载失败，请检查网络后重试')
   } finally {
     loading.value = false
   }
@@ -126,6 +150,19 @@ onMounted(fetchStats)
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+}
+
+.load-error {
+  margin-bottom: 24px;
+}
+
+.load-error-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .stat-card {

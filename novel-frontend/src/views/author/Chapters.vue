@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { ArrowLeft } from '@element-plus/icons-vue'
@@ -83,10 +83,14 @@ const page = ref(1)
 const size = ref(10)
 const total = ref(0)
 
+// 兼容 weekly=1 / weekly=true / weekly=yes 等真值写法（与后端布尔解析保持一致），
+// 保证统计卡片跳转、手写、复制或外部链接的筛选结果一致。
+const parseWeeklyFlag = (val) => ['1', 'true', 'yes', 'on'].includes(String(val).trim().toLowerCase())
+const parseStatus = (val) => (val === 'DRAFT' || val === 'PUBLISHED' ? val : '')
+
 // 筛选条件由统计卡片跳转的 query 初始化
-const statusFilter = ref(route.query.status === 'DRAFT' || route.query.status === 'PUBLISHED'
-  ? route.query.status : '')
-const weeklyOnly = ref(route.query.weekly === '1')
+const statusFilter = ref(parseStatus(route.query.status))
+const weeklyOnly = ref(parseWeeklyFlag(route.query.weekly))
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
@@ -136,6 +140,21 @@ const onPageChange = (val) => {
   page.value = val
   fetchChapters()
 }
+
+// 地址栏 query 变化（浏览器前进/后退、外部链接跳转）时同步筛选状态；
+// 与当前值一致时跳过，避免 onFilterChange 中 router.replace 触发重复请求。
+watch(
+  () => route.query,
+  (query) => {
+    const nextStatus = parseStatus(query.status)
+    const nextWeekly = parseWeeklyFlag(query.weekly)
+    if (nextStatus === statusFilter.value && nextWeekly === weeklyOnly.value) return
+    statusFilter.value = nextStatus
+    weeklyOnly.value = nextWeekly
+    page.value = 1
+    fetchChapters()
+  }
+)
 
 const formatDateTime = (val) => {
   if (!val) return '-'
