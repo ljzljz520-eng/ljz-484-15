@@ -8,15 +8,19 @@ public class Novel {
     private String description;
     private String coverUrl;
     private LocalDateTime createdAt;
+    /** 最近更新时间（由章节更新时间计算，无章节时取创建时间） */
+    private LocalDateTime updatedAt;
 
     public Novel() {}
 
-    public Novel(Long id, String title, String description, String coverUrl, LocalDateTime createdAt) {
+    public Novel(Long id, String title, String description, String coverUrl,
+                 LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.coverUrl = coverUrl;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() { return id; }
@@ -33,4 +37,7 @@ public class Novel {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

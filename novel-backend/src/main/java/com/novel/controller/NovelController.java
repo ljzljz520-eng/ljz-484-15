@@ -5,7 +5,9 @@ import com.novel.model.Novel;
 import com.novel.repository.DataRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +47,7 @@ public class NovelController {
     public Map<String, Object> getNovelDetail(@PathVariable Long id) {
         Novel novel = dataRepository.findNovelById(id);
         if (novel == null) {
-            throw new RuntimeException("Novel not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Novel not found");
         }
         List<Chapter> chapters = dataRepository.findChaptersByNovelId(id);
 
@@ -66,7 +68,7 @@ public class NovelController {
     public Chapter getChapter(@PathVariable Long id) {
         Chapter chapter = dataRepository.findChapterById(id);
         if (chapter == null) {
-            throw new RuntimeException("Chapter not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found");
         }
         return chapter;
     }
