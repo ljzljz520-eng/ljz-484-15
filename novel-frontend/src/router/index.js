@@ -2,12 +2,18 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Detail from '../views/Detail.vue'
 import Read from '../views/Read.vue'
+import Workbench from '../views/Workbench.vue'
 
 const routes = [
     {
         path: '/',
         name: 'Home',
         component: Home
+    },
+    {
+        path: '/workbench',
+        name: 'Workbench',
+        component: Workbench
     },
     {
         path: '/novel/:id',
